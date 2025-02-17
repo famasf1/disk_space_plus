@@ -7,11 +7,22 @@ import io.flutter.plugin.common.MethodChannel
 
 class MethodHandlerImpl : MethodChannel.MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        when(call.method) {
-            "getFreeDiskSpace" -> result.success(getFreeDiskSpace())
-            "getTotalDiskSpace" -> result.success(getTotalDiskSpace())
-            "getFreeDiskSpaceForPath" -> result.success(getFreeDiskSpaceForPath(call.argument<String>("path")!!))
-            else -> result.notImplemented()
+        try {
+            when (call.method) {
+                "getFreeDiskSpace" -> result.success(getFreeDiskSpace())
+                "getTotalDiskSpace" -> result.success(getTotalDiskSpace())
+                "getFreeDiskSpaceForPath" -> {
+                    val path = call.argument<String>("path")
+                    if (path != null) {
+                        result.success(getFreeDiskSpaceForPath(path))
+                    } else {
+                        result.error("INVALID_PATH", "Path cannot be null", null)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        } catch (e: Exception) {
+            result.error("DISK_SPACE_ERROR", e.message, null)
         }
     }
 
